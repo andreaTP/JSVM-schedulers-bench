@@ -26,6 +26,7 @@ lazy val immediate = project
   .dependsOn(common)
 
 lazy val root = project.aggregate(
+  common,
   timeout,
   promise,
   immediate
