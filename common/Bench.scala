@@ -5,9 +5,11 @@ object Bench {
 
   val LEVEL = 10
 
-  val INNER_SPAWN = 5
+  val INNER_SPAWN = 7//5
 
   val LIMIT = math.pow(LEVEL, INNER_SPAWN)
+
+  val MAX_TIME_FROM_LAST = 100
 
   var count = 0
 
@@ -22,20 +24,27 @@ object Bench {
         throw err
     }
 
-    var called = false
-
     def end(time: Long) = {
-      if (!called)
-        println(s"Ellapsed time: ${time - startTime}")
+      println(s"Ellapsed time: ${time - startTime}")
 
-      called = true
+      System.exit(0)
     }
+
+    var last = 0L
 
     def next(): Unit = {
       scala.concurrent.Future {
         //js.Dynamic.global.console.log(count)
 
         count += 1
+
+        var now = Platform.currentTime
+        if (now - last > MAX_TIME_FROM_LAST) {
+          println("Too much time since last increment stopping")
+          println(count)
+          System.exit(0)
+        }
+        last = now
 
         if (count >= LIMIT) end(Platform.currentTime)
         else {
@@ -49,6 +58,7 @@ object Bench {
     }
 
     println(s"Limit at $LIMIT")
+    last = Platform.currentTime
     startTime = Platform.currentTime
     next()
   }
